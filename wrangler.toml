@@ -1,0 +1,5 @@
+# Cloudflare Pages project for the G.K. BTU Students frontend
+# Deploy: `npm run deploy` (builds, then `wrangler pages deploy dist`)
+name = "gk-btu-students"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-09-01"

@@ -123,13 +123,13 @@ export const AdminDigestCron: React.FC<AdminDigestCronProps> = ({ language = 'ka
 
       {/* Telemetry HUD Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
+        <div className="lift bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
           <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">{t.cronCadence}</span>
           <div className="text-sm font-bold text-indigo-400 font-mono">{t.cronCadenceVal}</div>
           <div className="text-[11px] text-slate-500 mt-1">Schedule: 0 8 * * *</div>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
+        <div className="lift bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
           <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">{t.cronStatusLabel}</span>
           <div className="text-sm font-bold text-emerald-400 flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
@@ -140,13 +140,13 @@ export const AdminDigestCron: React.FC<AdminDigestCronProps> = ({ language = 'ka
           </div>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
+        <div className="lift bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
           <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">{t.cronBriefsCreated}</span>
           <div className="text-base font-bold text-slate-100 font-mono">{digests.length} {language === 'ka' ? 'დაიჯესტი' : 'Digests'}</div>
           <div className="text-[11px] text-slate-500 mt-1">AI synthesis enabled</div>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
+        <div className="lift bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
           <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">{t.cronEmailsDispatched}</span>
           <div className="text-base font-bold text-violet-400 font-mono">{emailLogs.length} {language === 'ka' ? 'ჩაბარებული' : 'Delivered'}</div>
           <div className="text-[11px] text-slate-500 mt-1">100% delivery rate</div>
@@ -199,7 +199,7 @@ export const AdminDigestCron: React.FC<AdminDigestCronProps> = ({ language = 'ka
           <div className="bg-slate-950 rounded-xl border border-slate-800 p-6 space-y-5">
             <div className="text-xs text-slate-400 border-b border-slate-800/80 pb-3 flex items-center justify-between">
               <div>
-                <span className="text-slate-500">{language === 'ka' ? 'გამგზავნი:' : 'From:'}</span> digest-agent@cognitest.edu (University Autonomous Agent)
+                <span className="text-slate-500">{language === 'ka' ? 'გამგზავნი:' : 'From:'}</span> G.K. BTU Students digest
               </div>
               <div>
                 <span className="text-slate-500">{language === 'ka' ? 'თემა:' : 'Subject:'}</span> [Morning Digest] {selectedDigest.headline}
@@ -305,7 +305,7 @@ export const AdminDigestCron: React.FC<AdminDigestCronProps> = ({ language = 'ka
                             title={log.error || ''}
                             className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/30"
                           >
-                            {log.status === 'not_configured' ? 'SMTP not configured' : 'Failed'}
+                            {log.status === 'not_configured' ? 'Email not configured' : 'Failed'}
                           </span>
                         )}
                       </td>

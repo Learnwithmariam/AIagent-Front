@@ -1,6 +1,6 @@
 /**
  * Central API client.
- * - VITE_API_URL points to the backend (e.g. https://cognitest-api.onrender.com). Empty = same origin.
+ * - VITE_API_URL points to the backend (e.g. https://gk-btu-students-api.<account>.workers.dev). Empty = same origin.
  * - Adds the login token to every request.
  */
 const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');

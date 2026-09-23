@@ -1,60 +1,67 @@
-# CogniTest — Frontend
+# G.K. BTU Students — Frontend
 
-React + Vite + Tailwind ინტერფეისი. სამუშაოდ სჭირდება გაშვებული `cognitest-backend`.
+React 19 + Vite + Tailwind v4 interface for the BTU course **Innovative Entrepreneurship & Startups**. Deployed on **Cloudflare Pages**; the API is a separate Cloudflare Worker (`AIagent-Back`).
 
-## ლოკალურად
+## Local development
 
 ```bash
 npm install
-npm run dev
+npm run dev          # http://localhost:5173
 ```
 
-`npm run dev` გაუშვებს ფრონტს `http://localhost:5173`-ზე და `/api`-სა და `/ws`-ს გადაამისამართებს `http://localhost:4000`-ზე (იხ. `vite.config.ts`). ანუ ლოკალურად `.env` არ გჭირდება — მხოლოდ ბექენდი უნდა იყოს გაშვებული.
+The dev server proxies `/api` and `/ws` to the API Worker on `http://localhost:8787`. Start it with `npm run dev` in the backend repo, so no `.env` is needed locally.
 
-## პროდაქშენი
+## Deploy to Cloudflare Pages
+
+**Option A: Git integration (dashboard)**
+
+1. Workers & Pages → Create → Pages → connect this repository
+2. Framework preset: *Vite* · Build command `npm run build` · Output `dist`
+3. Environment variable: `VITE_API_URL` = your Worker URL, e.g. `https://gk-btu-students-api.<account>.workers.dev` (no trailing `/`)
+4. Add the Pages URL to the backend's `FRONTEND_URL` in `wrangler.toml` (CORS), then redeploy the API
+
+**Option B: CLI**
 
 ```bash
-cp .env.example .env.production
-# VITE_API_URL=https://შენი-ბექენდის-მისამართი
-npm run build
+echo "VITE_API_URL=https://gk-btu-students-api.<account>.workers.dev" > .env.production
+npx wrangler login
+npm run deploy       # build + wrangler pages deploy dist
 ```
 
-`VITE_API_URL` ჩაიშენება build-ის დროს, ამიტომ მისი შეცვლის შემდეგ ხელახლა უნდა დააბილდო.
+**Option C: GitHub Actions.** `.github/workflows/deploy.yml` deploys on every push to `main`. It needs the repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, and the repository variable `VITE_API_URL`.
 
-## დეპლოი (Vercel)
+`VITE_API_URL` is baked in at build time, so rebuild after changing it. `public/_redirects` gives SPA routing and `public/_headers` sets security and caching headers.
 
-1. New Project → აირჩიე ეს რეპო
-2. Framework: Vite · Build: `npm run build` · Output: `dist`
-3. Environment Variables: `VITE_API_URL` = ბექენდის მისამართი (ბოლოს `/` გარეშე)
-4. ბექენდზე `FRONTEND_URL`-ში ჩაწერე Vercel-ის მისამართი, თორემ CORS დაბლოკავს
+## Design system
 
-Netlify-ზე იგივე პარამეტრებია.
+The whole palette lives in `src/index.css`:
 
-## სტრუქტურა
+- **Brand**: BTU magenta `#E20074` (`brand-*`). Tailwind's `indigo-*` scale is remapped to it and `violet-*` to a berry accent, so existing components pick up the brand automatically. `slate-*` is remapped to a plum-tinted ink.
+- **Glass**: cards (`bg-slate-900` + rounded) and modals render as frosted glass over an animated aurora background. `.glass` and `.glass-strong` are available for new markup.
+- **Micro-interactions**: every button presses in on click. Primary buttons (`bg-indigo-600`) get a magenta gradient, a glow and a sheen on hover. Cards use `.lift`.
+- **3D**: `components/ui/TiltCard.tsx`, a pointer-tracking tilt with a magenta glare. It's disabled on touch and for `prefers-reduced-motion`.
+- **Motion**: page and tab transitions, the sliding nav indicator and the chat bubbles use `motion/react`.
+
+## Structure
 
 ```
 src/
-  lib/api.ts          — API კლიენტი: ტოკენი, WebSocket-ის მისამართი
-  App.tsx             — ავტორიზაცია, როუტინგი, WebSocket
+  lib/api.ts            API client: token, WebSocket URL
+  App.tsx               auth, landing page, routing, WebSocket
+  index.css             design tokens, glass, motion
   components/
-    AuthLoginModal        — შესვლა
-    PasswordChangeModal   — პაროლის შეცვლა (სავალდებულო პირველ ჯერზე)
-    Navbar
-    StudentTeachingAgent  — AI ჩატი
+    ui/                 BrandMark, TiltCard, Aurora, Markdown
+    Navbar, AuthLoginModal, PasswordChangeModal
+    StudentTeachingAgent   AI chat (OpenRouter model picker)
     StudentExamCenter / ExamTakingScreen / CountdownTimer
     StudentDigests
-    Admin*                — ტესტები, სილაბუსი, სტუდენტები, მონიტორინგი, დაიჯესტი
-  context/LanguageContext — ka / en
-  i18n.ts, utils/
+    Admin*              tests, knowledge base, students, live monitor, digest
+  context/LanguageContext, i18n.ts
 ```
 
-## რამდენიმე მნიშვნელოვანი დეტალი
+## Notes
 
-- **ტოკენი** ინახება `localStorage`-ში (`cognitest_token`). 401-ის შემთხვევაში ავტომატურად ხდება logout.
-- **როლი სერვერიდან მოდის.** ინტერფეისში როლის გადამრთველი აღარ არის — რას ხედავ, ის შენი ანგარიშის როლზეა დამოკიდებული.
-- **გამოცდის ტაიმერი სერვერისაა.** გვერდის განახლება დროს არ განაახლებს.
-- **მონიტორინგის მოვლენებს ბრაუზერი მხოლოდ აგზავნის**; შეჯამებას სერვერი თვლის.
-
-## მონიტორინგის რეალური შესაძლებლობები
-
-ბრაუზერი ხედავს: ტაბის გადართვას, ფანჯრის დაკარგვას, copy/paste-ს, მარჯვენა ღილაკს, fullscreen-იდან გამოსვლას, კავშირის გაწყვეტას. ვერ ხედავს: მეორე მოწყობილობას, მეორე კომპიუტერს, სხვა ადამიანს გვერდით. ამიტომ ტექნიკური მონიტორინგი აუდიტორიაში ზედამხედველობის დამატებაა და არა ჩანაცვლება. iPhone-ზე fullscreen რეჟიმი არ მუშაობს — ამას ნუ დააფუძნებ წესებს.
+- The token is kept in `localStorage`. A 401 logs the user out automatically.
+- Roles come from the server. What you see depends on your account.
+- The exam timer runs on the server, so reloading the page doesn't reset it.
+- Proctoring sees tab switches, focus loss, copy/paste, right-click, leaving fullscreen and disconnects. It can't see a second device or another person in the room, so it supports in-room supervision rather than replacing it.

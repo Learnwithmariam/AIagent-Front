@@ -10,8 +10,8 @@ export interface TranslationDictionary {
 export const translations: TranslationDictionary = {
   // Brand & Common
   'app.title': {
-    en: 'CogniTest',
-    ka: 'CogniTest',
+    en: 'G.K. BTU Students',
+    ka: 'G.K. BTU Students',
   },
   'app.badge': {
     en: 'AI & Proctoring',
@@ -304,8 +304,8 @@ export const translations: TranslationDictionary = {
     ka: 'აკადემიური დილის დაიჯესტი და კვლევითი სიახლეები',
   },
   'digest.banner_desc': {
-    en: 'Every morning at 08:00 AM, our background Cron Agent fetches real industry breakthroughs, analyzes pedagogical relevance via Gemini, and delivers an email digest.',
-    ka: 'ყოველ დილით 08:00 საათზე ჩვენი ავტონომიური აგენტი აგროვებს უახლეს ტექნოლოგიურ სიახლეებს, აკავშირებს მათ სილაბუსის თემებთან Gemini-ს დახმარებით და ამზადებს დაიჯესტს.',
+    en: 'Every morning at 08:00 AM, our background Cron Agent fetches real industry breakthroughs, analyzes pedagogical relevance via AI (OpenRouter), and delivers an email digest.',
+    ka: 'ყოველ დილით 08:00 საათზე ჩვენი ავტონომიური აგენტი აგროვებს უახლეს ტექნოლოგიურ სიახლეებს, აკავშირებს მათ სილაბუსის თემებთან AI-ის (OpenRouter) დახმარებით და ამზადებს დაიჯესტს.',
   },
   'digest.subscribe': {
     en: 'Subscribe for Morning Digest',

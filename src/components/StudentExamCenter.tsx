@@ -14,6 +14,7 @@ import {
   FileCheck,
 } from 'lucide-react';
 import { Test, Student, TestSubmission } from '../types';
+import { TiltCard } from './ui/TiltCard';
 import { Language, translations } from '../i18n';
 
 interface StudentExamCenterProps {
@@ -77,9 +78,10 @@ export const StudentExamCenter: React.FC<StudentExamCenterProps> = ({
             const alreadySubmitted = studentSubmissions.find((s) => s.testId === test.id);
 
             return (
-              <div
+              <TiltCard
                 key={test.id}
-                className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition-all group"
+                intensity={5}
+                className="glass rounded-2xl p-6 flex flex-col justify-between hover:border-brand-500/25 group"
               >
                 <div>
                   <div className="flex items-start justify-between gap-3 mb-3">
@@ -152,7 +154,7 @@ export const StudentExamCenter: React.FC<StudentExamCenterProps> = ({
                     </>
                   )}
                 </div>
-              </div>
+              </TiltCard>
             );
           })}
         </div>

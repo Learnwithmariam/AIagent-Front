@@ -78,7 +78,7 @@ export interface QuestionGrading {
   maxPoints: number;
   feedback: string;
   isCorrect?: boolean;
-  autoGradedBy?: 'mcq_rule' | 'gemini_ai' | 'proctor_manual';
+  autoGradedBy?: 'mcq_rule' | 'ai' | 'gemini_ai' | 'proctor_manual';
 }
 
 export interface ProctorSummary {
