@@ -85,13 +85,27 @@ export const StudentTeachingAgent: React.FC<StudentTeachingAgentProps> = ({ acti
     setLoading(true);
 
     try {
-      const res = await apiFetch('/api/agent/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, language, history }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'request failed');
+      // The server already retries and falls back between AI providers; if the whole request still
+      // fails (network blip, overloaded provider), try once more quietly before showing an error.
+      const ask = async () => {
+        const res = await apiFetch('/api/agent/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text, language, history }),
+          signal: AbortSignal.timeout(70_000),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw Object.assign(new Error(data.error || 'request failed'), { status: res.status });
+        return data;
+      };
+      let data;
+      try {
+        data = await ask();
+      } catch (err: any) {
+        if ([400, 401, 403, 429].includes(err?.status)) throw err;
+        await new Promise((r) => setTimeout(r, 1500));
+        data = await ask();
+      }
       setMessages((prev) => [
         ...prev,
         { id: `ai-${Date.now()}`, role: 'assistant', content: data.reply, timestamp: now(), citations: data.citations },

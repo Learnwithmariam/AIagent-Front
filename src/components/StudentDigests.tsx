@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { DailyDigest, Student } from '../types';
 import { Language, translations } from '../i18n';
+import { NoNewsToday, todayInTbilisi } from './ui/NoNewsToday';
 
 interface StudentDigestsProps {
   activeStudent: Student;
@@ -43,7 +44,8 @@ export const StudentDigests: React.FC<StudentDigestsProps> = ({
       if (res.ok) {
         const data: DailyDigest[] = await res.json();
         setDigests(data);
-        if (data.length > 0) setSelectedDigest(data[0]);
+        // Open today's digest if there is one; otherwise the "no news today" panel shows
+        setSelectedDigest(data.find((d) => d.date === todayInTbilisi()) || null);
       }
     } catch (err) {
       console.error('Failed fetching digests', err);
@@ -119,6 +121,17 @@ export const StudentDigests: React.FC<StudentDigestsProps> = ({
           </h2>
 
           <div className="space-y-3">
+            {!loading && !digests.some((d) => d.date === todayInTbilisi()) && (
+              <div
+                onClick={() => setSelectedDigest(null)}
+                className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                  selectedDigest === null ? 'bg-indigo-950/40 border-indigo-500 shadow-md' : 'bg-slate-900 border-slate-800 hover:border-slate-700'
+                }`}
+              >
+                <div className="text-[10px] text-slate-400 mb-1 font-mono">{todayInTbilisi()}</div>
+                <h3 className="font-bold text-sm text-slate-300">{language === 'ka' ? 'დღეს სიახლეები არ არის' : 'No news today'}</h3>
+              </div>
+            )}
             {digests.map((d) => {
               const isSelected = selectedDigest?.id === d.id;
               return (
@@ -156,8 +169,6 @@ export const StudentDigests: React.FC<StudentDigestsProps> = ({
                 <div className="flex items-center gap-2 text-xs text-indigo-400 font-semibold uppercase tracking-wider mb-2">
                   <Calendar className="w-4 h-4" />
                   <span>{t.date}: {selectedDigest.date}</span>
-                  <span className="text-slate-600">•</span>
-                  <span>{language === 'ka' ? `გაეგზავნა ${selectedDigest.sentToCount} სტუდენტს` : `Sent to ${selectedDigest.sentToCount} registered scholars`}</span>
                 </div>
                 <h2 className="text-xl sm:text-2xl font-bold text-slate-100 leading-tight">
                   {selectedDigest.headline}
@@ -248,9 +259,13 @@ export const StudentDigests: React.FC<StudentDigestsProps> = ({
               )}
             </div>
           ) : (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center text-slate-400">
-              {language === 'ka' ? 'დაიჯესტი არ არის არჩეული.' : 'No daily digest selected.'}
-            </div>
+            loading ? (
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center text-slate-400">
+                {language === 'ka' ? 'იტვირთება...' : 'Loading...'}
+              </div>
+            ) : (
+              <NoNewsToday language={language} />
+            )
           )}
         </div>
       </div>

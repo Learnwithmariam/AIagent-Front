@@ -1,12 +1,13 @@
-name: Deploy frontend to Cloudflare Pages
+name: Deploy frontend to Cloudflare Workers
 
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 concurrency:
-  group: deploy-pages
+  group: deploy-frontend-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -25,12 +26,13 @@ jobs:
       - run: npm run typecheck
       - run: npm run build
         env:
-          # Repository variable: the deployed API Worker URL, no trailing slash
-          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          # The deployed API Worker URL (no trailing slash); the repository variable VITE_API_URL overrides it
+          VITE_API_URL: ${{ vars.VITE_API_URL || 'https://aiagent-back.giorgi-khatiashvili-9e4.workers.dev' }}
+      # Deploys the "aiagent-front" Worker (static assets, see wrangler.toml). Pull requests only build.
       - name: Deploy
-        if: ${{ env.CLOUDFLARE_API_TOKEN != '' }}
+        if: ${{ github.event_name != 'pull_request' && env.CLOUDFLARE_API_TOKEN != '' }}
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name gk-btu-students --branch main
+          command: deploy
