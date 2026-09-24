@@ -290,9 +290,14 @@ export const AdminTestManager: React.FC<AdminTestManagerProps> = ({
                         {new Date(sub.submittedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </td>
                       <td className="py-3 px-4 font-mono font-bold">
-                        {sub.totalScore}/{sub.maxScore} ({sub.percentage}%)
+                        {sub.status === 'pending_review' ? <span className="text-slate-500">—/{sub.maxScore}</span> : <>{sub.totalScore}/{sub.maxScore} ({sub.percentage}%)</>}
                       </td>
                       <td className="py-3 px-4">
+                        {sub.status === 'pending_review' ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold bg-amber-500/10 text-amber-300 border border-amber-500/30">
+                          {language === 'ka' ? 'ელოდება შეფასებას' : 'Awaiting grading'}
+                        </span>
+                        ) : (
                         <span
                           className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold ${
                             sub.passed
@@ -302,6 +307,7 @@ export const AdminTestManager: React.FC<AdminTestManagerProps> = ({
                         >
                           {sub.passed ? (language === 'ka' ? 'ჩაბარებულია' : 'PASSED') : (language === 'ka' ? 'ვერ ჩააბარა' : 'FAILED')}
                         </span>
+                        )}
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-1.5">

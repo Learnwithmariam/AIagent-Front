@@ -78,7 +78,8 @@ export interface QuestionGrading {
   maxPoints: number;
   feedback: string;
   isCorrect?: boolean;
-  autoGradedBy?: 'mcq_rule' | 'gemini_ai' | 'proctor_manual';
+  /** 'mcq_rule' and 'gemini_ai' only appear in data imported from the old server */
+  autoGradedBy?: 'proctor_manual' | 'mcq_rule' | 'gemini_ai';
 }
 
 export interface ProctorSummary {

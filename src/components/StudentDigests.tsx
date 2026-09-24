@@ -178,7 +178,7 @@ export const StudentDigests: React.FC<StudentDigestsProps> = ({
                   {selectedDigest.keyArticles.map((article, idx) => (
                     <div
                       key={idx}
-                      className="bg-slate-950/60 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-colors"
+                      className="lift bg-slate-950/60 border border-slate-800 rounded-xl p-5"
                     >
                       <div className="flex items-start justify-between gap-3 mb-2">
                         <h4 className="font-bold text-sm text-slate-100">{article.title}</h4>

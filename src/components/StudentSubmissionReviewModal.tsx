@@ -18,6 +18,7 @@ export const StudentSubmissionReviewModal: React.FC<StudentSubmissionReviewModal
 }) => {
   const t = translations[language];
   const questions: Question[] = test?.questions || [];
+  const pending = submission.status === 'pending_review';
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -27,6 +28,11 @@ export const StudentSubmissionReviewModal: React.FC<StudentSubmissionReviewModal
           <div>
             <div className="flex items-center gap-2">
               <h2 className="font-bold text-lg text-slate-100">{submission.testTitle}</h2>
+              {pending ? (
+                <span className="text-[11px] px-2.5 py-0.5 rounded-full font-bold uppercase bg-amber-500/10 text-amber-300 border border-amber-500/30">
+                  {language === 'ka' ? 'ელოდება ლექტორის შეფასებას' : 'Awaiting lecturer grading'}
+                </span>
+              ) : (
               <span
                 className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold uppercase ${
                   submission.passed
@@ -36,6 +42,7 @@ export const StudentSubmissionReviewModal: React.FC<StudentSubmissionReviewModal
               >
                 {submission.passed ? t.passed : t.failed} ({submission.percentage}%)
               </span>
+              )}
             </div>
             <p className="text-xs text-slate-400 mt-1">
               {t.reviewCandidate} <strong className="text-slate-200">{submission.studentName}</strong> • {t.reviewSubmittedAt}{' '}
@@ -56,12 +63,12 @@ export const StudentSubmissionReviewModal: React.FC<StudentSubmissionReviewModal
           <div>
             <span className="text-slate-500 block uppercase text-[10px] font-bold">{t.reviewTotalScore}</span>
             <span className="text-base font-bold text-indigo-400 font-mono">
-              {submission.totalScore} / {submission.maxScore}
+              {pending ? '—' : submission.totalScore} / {submission.maxScore}
             </span>
           </div>
           <div>
             <span className="text-slate-500 block uppercase text-[10px] font-bold">{t.reviewPercentage}</span>
-            <span className="text-base font-bold text-slate-200 font-mono">{submission.percentage}%</span>
+            <span className="text-base font-bold text-slate-200 font-mono">{pending ? '—' : `${submission.percentage}%`}</span>
           </div>
           <div>
             <span className="text-slate-500 block uppercase text-[10px] font-bold">{t.reviewIntegrityStatus}</span>
@@ -77,8 +84,8 @@ export const StudentSubmissionReviewModal: React.FC<StudentSubmissionReviewModal
           </div>
           <div>
             <span className="text-slate-500 block uppercase text-[10px] font-bold">{t.reviewAutoGradedBy}</span>
-            <span className="text-slate-300 capitalize">
-              {submission.gradedBy ? submission.gradedBy.replace('_', ' ') : 'Auto-Graded'}
+            <span className="text-slate-300">
+              {pending ? (language === 'ka' ? 'ჯერ არ არის შეფასებული' : 'Not graded yet') : language === 'ka' ? 'ლექტორი' : 'Lecturer'}
             </span>
           </div>
         </div>
@@ -104,7 +111,7 @@ export const StudentSubmissionReviewModal: React.FC<StudentSubmissionReviewModal
 
                   <div className="text-right">
                     <span className="font-mono font-bold text-xs text-indigo-300">
-                      {grading ? grading.earnedPoints : 0} / {q.points} {t.points}
+                      {pending || !grading ? '—' : grading.earnedPoints} / {q.points} {t.points}
                     </span>
                   </div>
                 </div>

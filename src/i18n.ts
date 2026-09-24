@@ -3,9 +3,9 @@ export type Language = 'ka' | 'en';
 export const translations = {
   ka: {
     // Platform Brand & Common
-    appTitle: 'CogniTest',
-    appBadge: 'AI & პროქტორინგი',
-    appSubtitle: 'ავტონომიური სასწავლო აგენტი და გამოცდების უსაფრთხოების სისტემა',
+    appTitle: 'G.K. BTU Students',
+    appBadge: 'BTU',
+    appSubtitle: 'ინოვაციური მეწარმეობა და სტარტაპები · AI მენტორი და გამოცდები',
     wsConnected: 'პროქტორინგის WS დაკავშირებულია',
     wsConnecting: 'WS კავშირი მყარდება...',
     student: 'სტუდენტი',
@@ -80,7 +80,7 @@ export const translations = {
     examDuration: 'ხანგრძლივობა',
     examStartTest: 'ტესტის დაწყება',
     examInstructions: 'ინსტრუქცია',
-    examViewResult: 'შედეგის ნახვა და AI შეფასება',
+    examViewResult: 'ნაშრომის ნახვა',
     examPastResults: 'თქვენი წინა გამოცდების შედეგები',
     examNoPast: 'წინა გამოცდები ჯერ არ ფიქსირდება.',
     examInstructionsModalTitle: 'საგამოცდო წესები და პროქტორინგი',
@@ -238,7 +238,7 @@ export const translations = {
 
     // Admin Test Manager
     testManagerTitle: 'გამოცდების მართვა და შეფასება',
-    testManagerSubtitle: 'შექმენით ახალი ტესტები, მართეთ კითხვები და შეაფასეთ სტუდენტების ნაშრომები Gemini AI-ით.',
+    testManagerSubtitle: 'შექმენით ტესტები, მართეთ კითხვები და შეაფასეთ სტუდენტების ნაშრომები.',
     tabSubmissionsList: 'სტუდენტების ნაშრომები',
     tabTestsList: 'საგამოცდო ტესტები',
     createTestBtn: 'ახალი ტესტის შექმნა',
@@ -254,7 +254,7 @@ export const translations = {
     testAddShortBtn: '+ მოკლე პასუხი',
     testAddEssayBtn: '+ კოდი / ესე',
     testSaveBtn: 'გამოცდის შექმნა და გამოქვეყნება',
-    testInspectHelp: 'დააჭირეთ ნებისმიერ ნაშრომს AI შეფასების სანახავად ან შესაცვლელად',
+    testInspectHelp: 'დააჭირეთ ნაშრომს მის შესაფასებლად',
     testColCandidate: 'გამოსაცდელი',
     testColTitle: 'გამოცდის სათაური',
     testColSubmitted: 'ჩაბარების დრო',
@@ -277,7 +277,7 @@ export const translations = {
 
     // Admin Knowledge Base
     kbTitle: 'სასწავლო ცოდნის ბაზა (RAG)',
-    kbSubtitle: 'მასალები, რომლებსაც AI სასწავლო აგენტი იყენებს სტუდენტებისთვის პასუხების გასაცემად და ტესტების შესაფასებლად.',
+    kbSubtitle: 'მასალები, რომლებსაც AI ჩატბოტი იყენებს სტუდენტების კითხვებზე პასუხის გასაცემად. შეფასებაში AI არ მონაწილეობს.',
     kbAddDocBtn: 'ახალი დოკუმენტის დამატება',
     kbDocTitle: 'სათაური',
     kbDocSubject: 'საგანი',
@@ -330,8 +330,6 @@ export const translations = {
 
     // Admin Grading Modal
     gradingModalTitle: 'სტუდენტის ნაშრომის შეფასება',
-    gradingAiEvaluateBtn: 'Gemini AI-ით ავტო-შეფასება',
-    gradingAiEvaluating: 'AI აფასებს...',
     gradingSaveAll: 'შეფასების შენახვა და გამოქვეყნება',
     gradingEarnedPoints: 'მიღებული ქულა:',
     gradingMaxPoints: 'მაქსიმალური:',
@@ -363,7 +361,6 @@ export const translations = {
     tabSwitches: 'ტაბების გადართვა',
     question: 'კითხვა',
     pts: 'ქულა',
-    regradeBtn: 'AI შეფასება',
     candidateAnswer: 'სტუდენტის პასუხი',
 
     cronCadence: 'ავტომატიზაციის სიხშირე',
@@ -383,9 +380,9 @@ export const translations = {
 
   en: {
     // Platform Brand & Common
-    appTitle: 'CogniTest',
-    appBadge: 'AI & Proctoring',
-    appSubtitle: 'Autonomous Educational Agent & Anti-Cheat Examination System',
+    appTitle: 'G.K. BTU Students',
+    appBadge: 'BTU',
+    appSubtitle: 'Innovative Entrepreneurship & Startups · AI mentor and exams',
     wsConnected: 'Proctoring WS Connected',
     wsConnecting: 'Connecting WS...',
     student: 'Student',
@@ -460,7 +457,7 @@ export const translations = {
     examDuration: 'Duration',
     examStartTest: 'Start Proctored Test',
     examInstructions: 'Instructions',
-    examViewResult: 'View Submission & AI Grading',
+    examViewResult: 'View submission',
     examPastResults: 'Your Past Exam Results',
     examNoPast: 'No previous exam submissions found.',
     examInstructionsModalTitle: 'Examination Instructions & Proctoring Rules',
@@ -618,7 +615,7 @@ export const translations = {
 
     // Admin Test Manager
     testManagerTitle: 'Test Creation & Candidate Submissions',
-    testManagerSubtitle: 'Author proctored assessments, configure question rubrics, and inspect Gemini AI grading reports.',
+    testManagerSubtitle: 'Author proctored assessments, manage questions and grade submissions.',
     tabSubmissionsList: 'Candidate Submissions',
     tabTestsList: 'Published Tests',
     createTestBtn: 'Create New Proctored Test',
@@ -634,7 +631,7 @@ export const translations = {
     testAddShortBtn: '+ Short Answer / Theory',
     testAddEssayBtn: '+ Essay / Code Implementation',
     testSaveBtn: 'Create & Publish Exam',
-    testInspectHelp: 'Click any submission to inspect or adjust AI grades',
+    testInspectHelp: 'Click a submission to grade it',
     testColCandidate: 'Candidate',
     testColTitle: 'Test Title',
     testColSubmitted: 'Submitted Time',
@@ -657,7 +654,7 @@ export const translations = {
 
     // Admin Knowledge Base
     kbTitle: 'Course Knowledge Base (RAG Grounding)',
-    kbSubtitle: 'Syllabus documents, textbook notes, and research papers used to ground the AI Teaching Agent and auto-grader.',
+    kbSubtitle: 'Course materials the AI chatbot uses to answer student questions. AI is never used for grading.',
     kbAddDocBtn: 'Add Knowledge Document',
     kbDocTitle: 'Document Title',
     kbDocSubject: 'Course Subject',
@@ -710,8 +707,6 @@ export const translations = {
 
     // Admin Grading Modal
     gradingModalTitle: 'Student Submission Evaluation',
-    gradingAiEvaluateBtn: 'Auto-Grade with Gemini AI',
-    gradingAiEvaluating: 'AI is Evaluating...',
     gradingSaveAll: 'Save All Grading & Publish',
     gradingEarnedPoints: 'Earned Points:',
     gradingMaxPoints: 'Max Points:',
@@ -743,7 +738,6 @@ export const translations = {
     tabSwitches: 'Tab Switches',
     question: 'Question',
     pts: 'pts',
-    regradeBtn: 'AI Regrade',
     candidateAnswer: 'Candidate Answer',
 
     cronCadence: 'Automation Cadence',
