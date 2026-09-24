@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { apiFetch } from '../lib/api';
-import { User, Plus, Mail, CheckCircle2, XCircle, Search, Shield } from 'lucide-react';
+import { User, Plus, CheckCircle2, XCircle, Search, Pencil, Trash2 } from 'lucide-react';
 import { Student } from '../types';
 import { Language, translations } from '../i18n';
 
@@ -16,14 +16,90 @@ export const AdminStudentDirectory: React.FC<AdminStudentDirectoryProps> = ({
   language = 'ka',
 }) => {
   const t = translations[language];
+  const ka = language === 'ka';
   const [search, setSearch] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
+  /** Student being edited; null while adding a new one */
+  const [editing, setEditing] = useState<Student | null>(null);
+  const [digestSubscribed, setDigestSubscribed] = useState(true);
+  const [busyEmail, setBusyEmail] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [department, setDepartment] = useState(
-    language === 'ka' ? 'კომპიუტერული მეცნიერება' : 'Computer Science'
-  );
+  const defaultDepartment = ka ? 'კომპიუტერული მეცნიერება' : 'Computer Science';
+  const [department, setDepartment] = useState(defaultDepartment);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const openAdd = () => {
+    setEditing(null);
+    setName('');
+    setEmail('');
+    setDepartment(defaultDepartment);
+    setDigestSubscribed(true);
+    setShowAddModal(true);
+  };
+
+  const openEdit = (s: Student) => {
+    setEditing(s);
+    setName(s.name);
+    setEmail(s.email);
+    setDepartment(s.department);
+    setDigestSubscribed(s.digestSubscribed);
+    setShowAddModal(true);
+  };
+
+  const closeModal = () => {
+    setShowAddModal(false);
+    setEditing(null);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editing) return;
+    if (!name.trim() || !email.trim()) {
+      alert(ka ? 'სახელი და ელფოსტა სავალდებულოა.' : 'Name and Email are required.');
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const res = await apiFetch(`/api/students/${encodeURIComponent(editing.email)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, department, digestSubscribed }),
+      });
+      if (res.ok) {
+        onRefreshStudents();
+        closeModal();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || (ka ? 'ცვლილებების შენახვა ვერ მოხერხდა' : 'Failed saving changes'));
+      }
+    } catch {
+      alert(ka ? 'ქსელის შეცდომა' : 'Network error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (s: Student) => {
+    const ok = window.confirm(
+      ka
+        ? `წავშალოთ სტუდენტი ${s.name} (${s.email})? მისი ანგარიში წაიშლება და სისტემაში ვეღარ შევა.`
+        : `Delete ${s.name} (${s.email})? Their account will be removed and they will no longer be able to sign in.`
+    );
+    if (!ok) return;
+    setBusyEmail(s.email);
+    try {
+      const res = await apiFetch(`/api/students/${encodeURIComponent(s.email)}`, { method: 'DELETE' });
+      if (res.ok) onRefreshStudents();
+      else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || (ka ? 'წაშლა ვერ მოხერხდა' : 'Failed deleting student'));
+      }
+    } catch {
+      alert(ka ? 'ქსელის შეცდომა' : 'Network error');
+    } finally {
+      setBusyEmail(null);
+    }
+  };
 
   const handleAddStudent = async () => {
     if (!name.trim() || !email.trim()) {
@@ -40,7 +116,7 @@ export const AdminStudentDirectory: React.FC<AdminStudentDirectoryProps> = ({
           name,
           email,
           department,
-          digestSubscribed: true,
+          digestSubscribed,
         }),
       });
 
@@ -59,7 +135,7 @@ export const AdminStudentDirectory: React.FC<AdminStudentDirectoryProps> = ({
           alert(language === 'ka' ? 'ეს სტუდენტი უკვე რეგისტრირებულია.' : 'This student already exists.');
         }
         onRefreshStudents();
-        setShowAddModal(false);
+        closeModal();
         setName('');
         setEmail('');
       } else {
@@ -106,7 +182,7 @@ export const AdminStudentDirectory: React.FC<AdminStudentDirectoryProps> = ({
         </div>
 
         <button
-          onClick={() => setShowAddModal(true)}
+          onClick={openAdd}
           className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 flex items-center gap-1.5 transition-all"
         >
           <Plus className="w-4 h-4" />
@@ -180,7 +256,25 @@ export const AdminStudentDirectory: React.FC<AdminStudentDirectoryProps> = ({
                     </button>
                   </td>
                   <td className="py-3 px-4 text-right">
-                    <span className="text-[11px] text-slate-500">{t.studentsActiveStatus}</span>
+                    <div className="inline-flex items-center gap-1">
+                      <button
+                        onClick={() => openEdit(s)}
+                        title={ka ? 'რედაქტირება' : 'Edit'}
+                        aria-label={ka ? 'რედაქტირება' : 'Edit'}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(s)}
+                        disabled={busyEmail === s.email}
+                        title={ka ? 'წაშლა' : 'Delete'}
+                        aria-label={ka ? 'წაშლა' : 'Delete'}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 disabled:opacity-40 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -193,7 +287,9 @@ export const AdminStudentDirectory: React.FC<AdminStudentDirectoryProps> = ({
       {showAddModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl">
-            <h2 className="font-bold text-lg text-slate-100 mb-4">{t.studentsModalTitle}</h2>
+            <h2 className="font-bold text-lg text-slate-100 mb-4">
+              {editing ? (ka ? 'სტუდენტის რედაქტირება' : 'Edit student') : t.studentsModalTitle}
+            </h2>
 
             <div className="space-y-4 text-xs">
               <div>
@@ -220,32 +316,52 @@ export const AdminStudentDirectory: React.FC<AdminStudentDirectoryProps> = ({
 
               <div>
                 <label className="block text-slate-400 mb-1 font-medium">{t.studentsDeptLabel}</label>
-                <select
+                <input
+                  type="text"
+                  list="department-options"
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                >
-                  <option>{language === 'ka' ? 'კომპიუტერული მეცნიერება' : 'Computer Science'}</option>
-                  <option>{language === 'ka' ? 'ელექტრო & კომპიუტერული ინჟინერია' : 'Electrical & Computer Engineering'}</option>
-                  <option>{language === 'ka' ? 'ხელოვნური ინტელექტი' : 'Artificial Intelligence'}</option>
-                  <option>{language === 'ka' ? 'რობოტოტექნიკა & სისტემები' : 'Robotics & Systems'}</option>
-                </select>
+                />
+                <datalist id="department-options">
+                  <option value={ka ? 'კომპიუტერული მეცნიერება' : 'Computer Science'} />
+                  <option value={ka ? 'ელექტრო & კომპიუტერული ინჟინერია' : 'Electrical & Computer Engineering'} />
+                  <option value={ka ? 'ხელოვნური ინტელექტი' : 'Artificial Intelligence'} />
+                  <option value={ka ? 'რობოტოტექნიკა & სისტემები' : 'Robotics & Systems'} />
+                  <option value={ka ? 'ბიზნესის ადმინისტრირება' : 'Business Administration'} />
+                </datalist>
               </div>
+
+              <label className="flex items-center gap-2 text-slate-300 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={digestSubscribed}
+                  onChange={(e) => setDigestSubscribed(e.target.checked)}
+                  className="accent-indigo-500"
+                />
+                {ka ? 'დილის დაიჯესტის გამოწერა' : 'Subscribed to the morning digest'}
+              </label>
             </div>
 
             <div className="mt-6 flex justify-end gap-2">
               <button
-                onClick={() => setShowAddModal(false)}
+                onClick={closeModal}
                 className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold"
               >
                 {t.cancel}
               </button>
               <button
-                onClick={handleAddStudent}
+                onClick={editing ? handleSaveEdit : handleAddStudent}
                 disabled={isSubmitting}
                 className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/30"
               >
-                {isSubmitting ? (language === 'ka' ? 'რეგისტრაცია...' : 'Registering...') : t.studentsRegisterBtn}
+                {editing
+                  ? isSubmitting
+                    ? ka ? 'ინახება...' : 'Saving...'
+                    : ka ? 'შენახვა' : 'Save changes'
+                  : isSubmitting
+                    ? ka ? 'რეგისტრაცია...' : 'Registering...'
+                    : t.studentsRegisterBtn}
               </button>
             </div>
           </div>

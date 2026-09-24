@@ -194,8 +194,9 @@ export const AdminGradingModal: React.FC<AdminGradingModalProps> = ({
                       type="number"
                       min={0}
                       max={q.points}
+                      step={0.5}
                       value={grading.earnedPoints}
-                      onChange={(e) => handleScoreChange(q.id, Number(e.target.value))}
+                      onChange={(e) => handleScoreChange(q.id, Math.min(q.points, Math.max(0, Number(e.target.value) || 0)))}
                       className="w-14 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs text-center font-bold text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                     />
                     <span className="text-xs text-slate-400">/ {q.points} {t.pts}</span>
@@ -251,7 +252,7 @@ export const AdminGradingModal: React.FC<AdminGradingModalProps> = ({
           <div className="text-xs text-slate-400">
             {t.totalScoreCalculated}:{' '}
             <strong className="text-indigo-300 font-mono text-sm">
-              {Object.values(gradings).reduce((sum, g) => sum + g.earnedPoints, 0)} / {submission.maxScore}
+              {Math.round(Object.values(gradings).reduce((sum, g) => sum + (Number(g.earnedPoints) || 0), 0) * 10) / 10} / {submission.maxScore}
             </strong>
           </div>
 

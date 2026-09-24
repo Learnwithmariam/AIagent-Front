@@ -71,9 +71,17 @@ export const AdminDigestCron: React.FC<AdminDigestCronProps> = ({ language = 'ka
         fetchCronStatus();
         if (data.digest) {
           setSelectedDigest(data.digest);
+        } else {
+          // Nothing new since the last digest: nothing is created or emailed
+          alert(
+            language === 'ka'
+              ? 'ბოლო დაიჯესტის შემდეგ ახალი ინფორმაცია არ გამოჩენილა — დაიჯესტი არ შეიქმნა და არ გაიგზავნა.'
+              : 'Nothing new since the last digest — nothing was created or sent.'
+          );
         }
       } else {
-        alert(language === 'ka' ? 'დაიჯესტის გაგზავნა ვერ მოხერხდა.' : 'Failed triggering automated morning digest.');
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || (language === 'ka' ? 'დაიჯესტის გაგზავნა ვერ მოხერხდა.' : 'Failed triggering automated morning digest.'));
       }
     } catch (err) {
       alert(language === 'ka' ? 'ქსელის შეცდომა დაიჯესტის გაშვებისას.' : 'Network error triggering digest cron task.');

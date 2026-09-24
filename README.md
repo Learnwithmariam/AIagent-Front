@@ -52,7 +52,7 @@ src/
   components/
     ui/                 BrandMark, TiltCard, Aurora, Markdown
     Navbar, AuthLoginModal, PasswordChangeModal
-    StudentTeachingAgent   AI chat (OpenRouter model picker)
+    StudentTeachingAgent   AI chat (routing to Gemini → OpenRouter happens server-side)
     StudentExamCenter / ExamTakingScreen / CountdownTimer
     StudentDigests
     Admin*              tests, knowledge base, students, live monitor, digest

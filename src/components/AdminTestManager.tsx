@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { apiFetch } from '../lib/api';
+import { MAX_POINTS } from '../types';
 import {
   GraduationCap,
   Plus,
@@ -68,34 +69,33 @@ export const AdminTestManager: React.FC<AdminTestManagerProps> = ({
         'პირველ კვარტალში $10,000-იანი შემოსავლის მიღწევა'
       ],
       correctAnswer: 0,
-      points: 25,
+      points: 2.5,
     },
     {
       id: 'q-demo-2',
       prompt: 'აღწერეთ რა განსხვავებაა Post-Money SAFE-სა და Pre-Money SAFE-ს შორის სტარტაპის საწყის ეტაპზე ინვესტიციის მოზიდვისას.',
       type: 'short_answer',
       gradingCriteria: 'უნდა ახსნას დამფუძნებლების წილის განზავება (dilution), კაპიტალიზაციის ცხრილის (Cap Table) გამჭვირვალობა და საკონვერტაციო ზღვარი (Valuation Cap).',
-      points: 35,
+      points: 3.5,
     },
     {
       id: 'q-demo-3',
       prompt: 'განმარტეთ Lean Startup მეთოდოლოგიის Build-Measure-Learn ციკლი და MVP-ს (Minimum Viable Product) როლი ჰიპოთეზების ვალიდაციაში.',
       type: 'short_answer',
       gradingCriteria: 'უნდა ახსნას ექსპერიმენტები, რაოდენობრივი/თვისებრივი უკუკავშირი, Pivot ან Persevere გადაწყვეტილების მიღება.',
-      points: 40,
+      points: 4,
     }
   ]);
 
-  const totalAllocatedPoints = questions.reduce((sum, q) => sum + (Number(q.points) || 0), 0);
-  const isOver100Points = totalAllocatedPoints > 100;
-  const isUnder100Points = totalAllocatedPoints < 100;
+  const totalAllocatedPoints = Math.round(questions.reduce((sum, q) => sum + (Number(q.points) || 0), 0) * 10) / 10;
+  const isOverMaxPoints = totalAllocatedPoints > MAX_POINTS;
 
   const [isCreating, setIsCreating] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const handleUpdateQuestionPoints = (id: string, points: number) => {
     setQuestions((prev) =>
-      prev.map((q) => (q.id === id ? { ...q, points: Math.max(1, points || 0) } : q))
+      prev.map((q) => (q.id === id ? { ...q, points: Math.max(0.5, Math.round((points || 0) * 10) / 10) } : q))
     );
     setValidationError(null);
   };
@@ -124,11 +124,11 @@ export const AdminTestManager: React.FC<AdminTestManagerProps> = ({
       return;
     }
 
-    if (totalAllocatedPoints > 100) {
+    if (totalAllocatedPoints > MAX_POINTS) {
       setValidationError(
         language === 'ka'
-          ? `ჯამური ქულა ვერ გადააჭარბებს 100-ს! მიმდინარე ჯამი: ${totalAllocatedPoints} ქულა. გთხოვთ შეამციროთ კითხვების ქულები.`
-          : `Total points cannot exceed 100! Current total: ${totalAllocatedPoints} pts. Please adjust question points.`
+          ? `ჯამური ქულა ვერ გადააჭარბებს ${MAX_POINTS}-ს! მიმდინარე ჯამი: ${totalAllocatedPoints} ქულა. გთხოვთ შეამციროთ კითხვების ქულები.`
+          : `Total points cannot exceed ${MAX_POINTS}! Current total: ${totalAllocatedPoints} pts. Please adjust question points.`
       );
       return;
     }
@@ -177,9 +177,9 @@ export const AdminTestManager: React.FC<AdminTestManagerProps> = ({
   };
 
   const handleAddQuestion = (type: 'mcq' | 'short_answer' | 'essay_code') => {
-    // Determine suggested default points so it does not immediately breach 100 if possible
-    const remaining = Math.max(5, 100 - totalAllocatedPoints);
-    const suggestedPoints = Math.min(type === 'mcq' ? 10 : 20, remaining);
+    // Suggest default points that don't immediately breach the 10-point maximum if possible
+    const remaining = Math.max(0.5, MAX_POINTS - totalAllocatedPoints);
+    const suggestedPoints = Math.min(type === 'mcq' ? 1 : 2, remaining);
 
     const newQ: Question = {
       id: `q-${Date.now()}`,
@@ -484,48 +484,48 @@ export const AdminTestManager: React.FC<AdminTestManagerProps> = ({
                 </div>
               </div>
 
-              {/* Point Allocation & 100-Point Limit Validation Bar */}
+              {/* Point Allocation & 10-Point Limit Validation Bar */}
               <div className={`p-4 rounded-xl border transition-all ${
-                isOver100Points
+                isOverMaxPoints
                   ? 'bg-rose-950/40 border-rose-500/50 text-rose-200 shadow-lg shadow-rose-950/30'
-                  : totalAllocatedPoints === 100
+                  : totalAllocatedPoints === MAX_POINTS
                   ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-200'
                   : 'bg-indigo-950/30 border-indigo-500/30 text-indigo-200'
               }`}>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-sm tracking-wide">
-                      {language === 'ka' ? 'ტესტის ქულების განაწილება:' : 'Score Allocation & 100-Pt Limit:'}
+                      {language === 'ka' ? 'ტესტის ქულების განაწილება:' : `Score Allocation & ${MAX_POINTS}-Pt Limit:`}
                     </span>
                     <span className={`text-base font-black px-2.5 py-0.5 rounded-lg font-mono ${
-                      isOver100Points
+                      isOverMaxPoints
                         ? 'bg-rose-600 text-white animate-pulse'
-                        : totalAllocatedPoints === 100
+                        : totalAllocatedPoints === MAX_POINTS
                         ? 'bg-emerald-600 text-white'
                         : 'bg-indigo-600 text-white'
                     }`}>
-                      {totalAllocatedPoints} / 100 {language === 'ka' ? 'ქულა' : 'pts'}
+                      {totalAllocatedPoints} / {MAX_POINTS} {language === 'ka' ? 'ქულა' : 'pts'}
                     </span>
                   </div>
 
                   <div>
-                    {isOver100Points ? (
+                    {isOverMaxPoints ? (
                       <span className="text-xs font-bold text-rose-400 flex items-center gap-1">
                         <XCircle className="w-4 h-4" />
                         {language === 'ka'
-                          ? `ლიმიტი გადაჭარბებულია ${totalAllocatedPoints - 100} ქულით! (მაქს: 100)`
-                          : `Exceeds 100-point limit by +${totalAllocatedPoints - 100} pts!`}
+                          ? `ლიმიტი გადაჭარბებულია ${Math.round((totalAllocatedPoints - MAX_POINTS) * 10) / 10} ქულით! (მაქს: ${MAX_POINTS})`
+                          : `Exceeds ${MAX_POINTS}-point limit by +${Math.round((totalAllocatedPoints - MAX_POINTS) * 10) / 10} pts!`}
                       </span>
-                    ) : totalAllocatedPoints === 100 ? (
+                    ) : totalAllocatedPoints === MAX_POINTS ? (
                       <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
                         <CheckCircle2 className="w-4 h-4" />
-                        {language === 'ka' ? 'იდეალური ბალანსი: ზუსტად 100 ქულა' : 'Perfect Allocation: Exactly 100 Points'}
+                        {language === 'ka' ? `იდეალური ბალანსი: ზუსტად ${MAX_POINTS} ქულა` : `Perfect Allocation: Exactly ${MAX_POINTS} Points`}
                       </span>
                     ) : (
                       <span className="text-xs text-indigo-300 font-medium">
                         {language === 'ka'
-                          ? `დარჩენილია გასანაწილებელი: ${100 - totalAllocatedPoints} ქულა`
-                          : `Remaining to allocate: ${100 - totalAllocatedPoints} pts`}
+                          ? `დარჩენილია გასანაწილებელი: ${Math.round((MAX_POINTS - totalAllocatedPoints) * 10) / 10} ქულა`
+                          : `Remaining to allocate: ${Math.round((MAX_POINTS - totalAllocatedPoints) * 10) / 10} pts`}
                       </span>
                     )}
                   </div>
@@ -535,13 +535,13 @@ export const AdminTestManager: React.FC<AdminTestManagerProps> = ({
                 <div className="w-full bg-slate-950/80 rounded-full h-2.5 overflow-hidden border border-slate-800">
                   <div
                     className={`h-full transition-all duration-300 ${
-                      isOver100Points
+                      isOverMaxPoints
                         ? 'bg-rose-500'
-                        : totalAllocatedPoints === 100
+                        : totalAllocatedPoints === MAX_POINTS
                         ? 'bg-emerald-500'
                         : 'bg-indigo-500'
                     }`}
-                    style={{ width: `${Math.min(100, totalAllocatedPoints)}%` }}
+                    style={{ width: `${Math.min(100, (totalAllocatedPoints / MAX_POINTS) * 100)}%` }}
                   />
                 </div>
               </div>
@@ -562,8 +562,8 @@ export const AdminTestManager: React.FC<AdminTestManagerProps> = ({
                     </span>
                     <span className="text-[11px] text-slate-400">
                       {language === 'ka'
-                        ? 'თითოეულ კითხვას შეგიძლიათ ინდივიდუალურად მიანიჭოთ სასურველი ქულა (ჯამი ≤ 100)'
-                        : 'Manually adjust the points assigned to each question individually (Total ≤ 100)'}
+                        ? `თითოეულ კითხვას შეგიძლიათ ინდივიდუალურად მიანიჭოთ სასურველი ქულა (ჯამი ≤ ${MAX_POINTS})`
+                        : `Manually adjust the points assigned to each question individually (Total ≤ ${MAX_POINTS})`}
                     </span>
                   </div>
                   <div className="flex gap-2">
@@ -616,8 +616,9 @@ export const AdminTestManager: React.FC<AdminTestManagerProps> = ({
                           </label>
                           <input
                             type="number"
-                            min="1"
-                            max="100"
+                            min="0.5"
+                            max={MAX_POINTS}
+                            step="0.5"
                             value={q.points}
                             onChange={(e) => handleUpdateQuestionPoints(q.id, Number(e.target.value))}
                             className="w-16 bg-slate-950 border border-slate-600 rounded-lg px-2 py-1 text-xs text-white font-mono font-bold text-center focus:outline-none focus:ring-1 focus:ring-indigo-500"
@@ -687,13 +688,13 @@ export const AdminTestManager: React.FC<AdminTestManagerProps> = ({
 
             <div className="p-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-950/60">
               <div className="text-xs">
-                {isOver100Points ? (
+                {isOverMaxPoints ? (
                   <span className="text-rose-400 font-bold">
-                    ⚠️ {language === 'ka' ? 'შენახვა დაბლოკილია: ქულები აჭარბებს 100-ს' : 'Publish blocked: Total points exceed 100'}
+                    ⚠️ {language === 'ka' ? `შენახვა დაბლოკილია: ქულები აჭარბებს ${MAX_POINTS}-ს` : `Publish blocked: Total points exceed ${MAX_POINTS}`}
                   </span>
                 ) : (
                   <span className="text-slate-400">
-                    {language === 'ka' ? 'ჯამი:' : 'Total:'} <strong className="text-white font-mono">{totalAllocatedPoints}</strong>/100 {language === 'ka' ? 'ქულა' : 'pts'}
+                    {language === 'ka' ? 'ჯამი:' : 'Total:'} <strong className="text-white font-mono">{totalAllocatedPoints}</strong>/{MAX_POINTS} {language === 'ka' ? 'ქულა' : 'pts'}
                   </span>
                 )}
               </div>
@@ -709,7 +710,7 @@ export const AdminTestManager: React.FC<AdminTestManagerProps> = ({
                 <button
                   type="button"
                   onClick={handleCreateTest}
-                  disabled={isCreating || isOver100Points || totalAllocatedPoints === 0}
+                  disabled={isCreating || isOverMaxPoints || totalAllocatedPoints === 0}
                   className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-white text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center gap-1.5 transition-all"
                 >
                   <Save className="w-3.5 h-3.5" />
