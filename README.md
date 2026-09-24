@@ -13,9 +13,7 @@ The dev server proxies `/api` and `/ws` to the API Worker on `http://localhost:8
 
 ## Deploy (Cloudflare Worker `aiagent-front`)
 
-**GitHub Actions (default).** `.github/workflows/deploy.yml` builds every pull request and deploys `main` to the `aiagent-front` Worker. It needs the repository secrets `CLOUDFLARE_API_TOKEN` (template "Edit Cloudflare Workers") and `CLOUDFLARE_ACCOUNT_ID`. The API URL defaults to `https://aiagent-back.giorgi-khatiashvili-9e4.workers.dev`; set the repository variable `VITE_API_URL` to override it.
-
-**CLI**
+Deploys are done directly with wrangler. `.github/workflows/ci.yml` only typechecks and builds pushes and pull requests; it never deploys.
 
 ```bash
 echo "VITE_API_URL=https://aiagent-back.giorgi-khatiashvili-9e4.workers.dev" > .env.production
