@@ -1,5 +1,10 @@
-# Cloudflare Pages project for the G.K. BTU Students frontend
-# Deploy: `npm run deploy` (builds, then `wrangler pages deploy dist`)
-name = "gk-btu-students"
-pages_build_output_dir = "dist"
+# Cloudflare Worker (static assets) for the G.K. BTU Students frontend
+# Deploy: `npm run deploy` (builds, then `wrangler deploy`), or push to main (.github/workflows/deploy.yml)
+name = "aiagent-front"
 compatibility_date = "2026-09-01"
+workers_dev = true
+
+[assets]
+directory = "./dist"
+# Single-page app: unknown paths serve index.html. public/_headers sets security and caching headers.
+not_found_handling = "single-page-application"

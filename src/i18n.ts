@@ -174,7 +174,7 @@ export const translations = {
 
     // Student Digests
     digestTitle: 'სასწავლო სიახლეების ყოველდღიური დაიჯესტი',
-    digestSubtitle: 'კომპიუტერული მეცნიერებისა და AI-ს უახლესი კვლევები, არქიტექტურული სიახლეები და სააზროვნო ამოცანები.',
+    digestSubtitle: 'დღის ახალი ამბები სტარტაპებისა და ინოვაციების სამყაროდან, კურსის კონცეფციებთან დაკავშირებული დასკვნები და დღის კითხვა.',
     digestSubscribedText: 'თქვენ გამოწერილი გაქვთ დილის დაიჯესტი',
     digestUnsubscribedText: 'გამოწერა გამორთულია',
     digestSubscribeBtn: 'დაიჯესტის გამოწერა',
@@ -320,10 +320,10 @@ export const translations = {
 
     // Admin Cron Digest
     cronTitle: 'დილის დაიჯესტის ავტომატიზაცია (Cron)',
-    cronSubtitle: 'ყოველ დილით AI აგენტი აგროვებს უახლეს სამეცნიერო სიახლეებს და უგზავნის გამომწერ სტუდენტებს.',
-    cronTriggerBtn: 'დაიჯესტის გენერირება და გაგზავნა ახლავე',
+    cronSubtitle: 'ყოველ დილით AI აგენტი აგროვებს დღის ახალ სიახლეებს და ამზადებს დაიჯესტს პლატფორმაზე. თუ ახალი ინფორმაცია არ არის, დაიჯესტი არ იქმნება.',
+    cronTriggerBtn: 'დაიჯესტის გენერირება',
     cronTriggering: 'დაიჯესტი მზადდება...',
-    cronNextRun: 'შემდეგი გაშვება (08:00 UTC):',
+    cronNextRun: 'შემდეგი გაშვება (08:00, თბილისის დრო):',
     cronSubscribersCount: 'აქტიური გამომწერები:',
     cronGeneratedDigests: 'გენერირებული დაიჯესტები',
     cronEmailLogs: 'გაგზავნილი შეტყობინებების ჟურნალი',
@@ -364,7 +364,7 @@ export const translations = {
     candidateAnswer: 'სტუდენტის პასუხი',
 
     cronCadence: 'ავტომატიზაციის სიხშირე',
-    cronCadenceVal: 'ყოველდღიურად 08:00 UTC',
+    cronCadenceVal: 'ყოველდღიურად 08:00 (თბილისი)',
     cronStatusLabel: 'Cron დემონის სტატუსი',
     cronStatusActive: 'აქტიურია (ფონურ რეჟიმში)',
     cronBriefsCreated: 'შექმნილი დაიჯესტები',
@@ -551,7 +551,7 @@ export const translations = {
 
     // Student Digests
     digestTitle: 'Daily Morning News & Research Digest',
-    digestSubtitle: 'Curated university-level breakthroughs in Computer Science, Distributed Systems, and AI, with daily cognitive challenges.',
+    digestSubtitle: 'The day’s new startup and innovation stories, linked to course concepts, plus a daily question.',
     digestSubscribedText: 'You are subscribed to daily morning digests',
     digestUnsubscribedText: 'Digest subscription is currently inactive',
     digestSubscribeBtn: 'Subscribe to Daily Digest',
@@ -697,10 +697,10 @@ export const translations = {
 
     // Admin Cron Digest
     cronTitle: 'Morning News Digest Automation (Cron)',
-    cronSubtitle: 'Autonomous morning schedule triggers daily science digests and emails student cohorts every day.',
-    cronTriggerBtn: 'Generate & Dispatch Daily Digest Now',
+    cronSubtitle: 'Every morning the AI collects the day’s new stories and prepares an in-app digest. If nothing is new, no digest is created.',
+    cronTriggerBtn: 'Generate digest now',
     cronTriggering: 'Generating Digest with AI...',
-    cronNextRun: 'Next Scheduled Dispatch (08:00 UTC):',
+    cronNextRun: 'Next scheduled run (08:00 Tbilisi):',
     cronSubscribersCount: 'Active Subscribers:',
     cronGeneratedDigests: 'Generated Daily Digests',
     cronEmailLogs: 'Outbound Delivery Audit Logs',
@@ -741,7 +741,7 @@ export const translations = {
     candidateAnswer: 'Candidate Answer',
 
     cronCadence: 'Automation Cadence',
-    cronCadenceVal: 'Daily at 08:00 UTC',
+    cronCadenceVal: 'Daily at 08:00 (Tbilisi)',
     cronStatusLabel: 'Cron Daemon Status',
     cronStatusActive: 'Active (Daemon Running)',
     cronBriefsCreated: 'Digests Created',

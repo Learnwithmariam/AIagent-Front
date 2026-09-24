@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { DailyDigest } from '../types';
 import { Language, translations } from '../i18n';
+import { NoNewsToday, todayInTbilisi } from './ui/NoNewsToday';
 
 interface OutgoingEmailLog {
   id: string;
@@ -51,11 +52,11 @@ export const AdminDigestCron: React.FC<AdminDigestCronProps> = ({ language = 'ka
       if (res.ok) {
         const data = await res.json();
         setCronStatus(data);
-        setDigests(data.digests || []);
+        const list: DailyDigest[] = data.digests || [];
+        setDigests(list);
         setEmailLogs(data.recentEmailLogs || []);
-        if (data.digests && data.digests.length > 0 && !selectedDigest) {
-          setSelectedDigest(data.digests[0]);
-        }
+        // Show today's digest if there is one; otherwise the "no news today" panel
+        setSelectedDigest((current) => current || list.find((d) => d.date === (data.today || todayInTbilisi())) || null);
       }
     } catch (err) {
       console.error('Failed fetching cron status', err);
@@ -71,9 +72,17 @@ export const AdminDigestCron: React.FC<AdminDigestCronProps> = ({ language = 'ka
         fetchCronStatus();
         if (data.digest) {
           setSelectedDigest(data.digest);
+        } else {
+          // Nothing new since the last digest: nothing is created or emailed
+          alert(
+            language === 'ka'
+              ? 'ბოლო დაიჯესტის შემდეგ ახალი ინფორმაცია არ გამოჩენილა — დაიჯესტი არ შეიქმნა და არ გაიგზავნა.'
+              : 'Nothing new since the last digest — nothing was created or sent.'
+          );
         }
       } else {
-        alert(language === 'ka' ? 'დაიჯესტის გაგზავნა ვერ მოხერხდა.' : 'Failed triggering automated morning digest.');
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || (language === 'ka' ? 'დაიჯესტის გენერირება ვერ მოხერხდა.' : 'Failed generating the digest.'));
       }
     } catch (err) {
       alert(language === 'ka' ? 'ქსელის შეცდომა დაიჯესტის გაშვებისას.' : 'Network error triggering digest cron task.');
@@ -126,7 +135,7 @@ export const AdminDigestCron: React.FC<AdminDigestCronProps> = ({ language = 'ka
         <div className="lift bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
           <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">{t.cronCadence}</span>
           <div className="text-sm font-bold text-indigo-400 font-mono">{t.cronCadenceVal}</div>
-          <div className="text-[11px] text-slate-500 mt-1">Schedule: 0 8 * * *</div>
+          <div className="text-[11px] text-slate-500 mt-1">Cron: {cronStatus?.schedule || '0 4 * * *'} (UTC)</div>
         </div>
 
         <div className="lift bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
@@ -136,7 +145,7 @@ export const AdminDigestCron: React.FC<AdminDigestCronProps> = ({ language = 'ka
             <span>{t.cronStatusActive}</span>
           </div>
           <div className="text-[11px] text-slate-500 mt-1">
-            {language === 'ka' ? 'ბოლო გაშვება: ' : 'Last run: '} {cronStatus?.lastRun ? new Date(cronStatus.lastRun).toLocaleTimeString() : (language === 'ka' ? 'ახლახან' : 'Recent')}
+            {language === 'ka' ? 'ბოლო გაშვება: ' : 'Last run: '} {cronStatus?.lastRunAt ? new Date(cronStatus.lastRunAt).toLocaleString() : '—'}
           </div>
         </div>
 
@@ -148,8 +157,14 @@ export const AdminDigestCron: React.FC<AdminDigestCronProps> = ({ language = 'ka
 
         <div className="lift bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
           <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">{t.cronEmailsDispatched}</span>
-          <div className="text-base font-bold text-violet-400 font-mono">{emailLogs.length} {language === 'ka' ? 'ჩაბარებული' : 'Delivered'}</div>
-          <div className="text-[11px] text-slate-500 mt-1">100% delivery rate</div>
+          <div className="text-base font-bold text-violet-400 font-mono">
+            {emailLogs.filter((l) => l.status === 'sent').length} {language === 'ka' ? 'ჩაბარებული' : 'Delivered'}
+          </div>
+          <div className="text-[11px] text-slate-500 mt-1">
+            {cronStatus?.emailOnSchedule === false
+              ? language === 'ka' ? 'ელ-ფოსტა გამორთულია' : 'Email is off'
+              : language === 'ka' ? 'მხოლოდ დილის 08:00-ის დაიჯესტი' : 'Only the 08:00 daily digest'}
+          </div>
         </div>
       </div>
 
@@ -178,19 +193,31 @@ export const AdminDigestCron: React.FC<AdminDigestCronProps> = ({ language = 'ka
       </div>
 
       {/* Content for Tab: Scheduler Preview */}
+      {activeTab === 'scheduler' && !selectedDigest && (
+        <NoNewsToday
+          language={language}
+          hint={
+            language === 'ka'
+              ? 'დღევანდელი დაიჯესტი არ შექმნილა, რადგან ბოლო დაიჯესტის შემდეგ ახალი ინფორმაცია არ გამოჩენილა. სცადეთ „დაიჯესტის გენერირება“ მოგვიანებით.'
+              : 'No digest was created today because nothing new came up since the last one. Try "Generate digest now" later.'
+          }
+        />
+      )}
       {activeTab === 'scheduler' && selectedDigest && (
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
           <div className="flex items-center justify-between border-b border-slate-800 pb-4">
             <div>
               <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">
-                {language === 'ka' ? `გაგზავნის თარიღი: ${selectedDigest.date} • თემატიკა: ${selectedDigest.subjectFocus}` : `Sent on ${selectedDigest.date} • Subject Focus: ${selectedDigest.subjectFocus}`}
+                {language === 'ka' ? `თარიღი: ${selectedDigest.date} • თემატიკა: ${selectedDigest.subjectFocus}` : `Date: ${selectedDigest.date} • Subject Focus: ${selectedDigest.subjectFocus}`}
               </span>
               <h2 className="text-xl font-bold text-white mt-1">{selectedDigest.headline}</h2>
             </div>
             <div className="text-right">
               <span className="text-xs text-slate-400 block">{language === 'ka' ? 'ადრესატები' : 'Recipients'}</span>
               <span className="font-bold text-sm text-emerald-400 font-mono">
-                {selectedDigest.sentToCount} {language === 'ka' ? 'რეგისტრირებული სტუდენტი' : 'Registered Students'}
+                {selectedDigest.sentToCount > 0
+                  ? `${selectedDigest.sentToCount} ${language === 'ka' ? 'სტუდენტი (ელ-ფოსტით)' : 'students (email)'}`
+                  : language === 'ka' ? 'მხოლოდ პლატფორმაზე' : 'In-app only'}
               </span>
             </div>
           </div>

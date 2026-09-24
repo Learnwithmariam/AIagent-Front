@@ -1,0 +1,28 @@
+name: Build frontend
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-frontend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # CI only. Deploys are done directly with `npm run deploy` (wrangler), not from GitHub.
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+        env:
+          # The deployed API Worker URL (no trailing slash); the repository variable VITE_API_URL overrides it
+          VITE_API_URL: ${{ vars.VITE_API_URL || 'https://aiagent-back.giorgi-khatiashvili-9e4.workers.dev' }}
