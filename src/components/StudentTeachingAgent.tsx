@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { apiFetch } from '../lib/api';
-import { Sparkles, Send, RotateCcw, Bot, Lightbulb, ShieldCheck, Cpu, ChevronDown, Check, BookOpen } from 'lucide-react';
+import { Sparkles, Send, RotateCcw, Bot, Lightbulb, ShieldCheck, BookOpen } from 'lucide-react';
 import { ChatMessage, Student } from '../types';
 import { Language, translations } from '../i18n';
 import { TiltCard } from './ui/TiltCard';
@@ -12,15 +12,7 @@ interface StudentTeachingAgentProps {
   language?: Language;
 }
 
-interface ModelOption {
-  id: string;
-  label: string;
-  free: boolean;
-}
-
-type UiMessage = ChatMessage & { model?: string };
-
-const MODEL_KEY = 'gkbtu_chat_model';
+type UiMessage = ChatMessage;
 const now = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
 export const StudentTeachingAgent: React.FC<StudentTeachingAgentProps> = ({ activeStudent, language = 'ka' }) => {
@@ -40,16 +32,7 @@ export const StudentTeachingAgent: React.FC<StudentTeachingAgentProps> = ({ acti
   const [messages, setMessages] = useState<UiMessage[]>([welcome()]);
   const [inputMessage, setInputMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [models, setModels] = useState<ModelOption[]>([]);
   const [aiConfigured, setAiConfigured] = useState(true);
-  const [model, setModel] = useState<string>(() => {
-    try {
-      return localStorage.getItem(MODEL_KEY) || '';
-    } catch {
-      return '';
-    }
-  });
-  const [modelMenuOpen, setModelMenuOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -60,32 +43,16 @@ export const StudentTeachingAgent: React.FC<StudentTeachingAgentProps> = ({ acti
   }, [language]);
 
   useEffect(() => {
-    apiFetch('/api/ai/models')
+    // The server picks the AI model automatically; we only need to know whether AI is set up
+    apiFetch('/api/ai/status')
       .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (!data) return;
-        setModels(data.models || []);
-        setAiConfigured(data.configured !== false);
-        setModel((current) => (data.models?.some((m: ModelOption) => m.id === current) ? current : data.default));
-      })
+      .then((data) => data && setAiConfigured(data.configured !== false))
       .catch(() => {});
   }, []);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, loading]);
-
-  const pickModel = (id: string) => {
-    setModel(id);
-    setModelMenuOpen(false);
-    try {
-      localStorage.setItem(MODEL_KEY, id);
-    } catch {
-      /* storage unavailable */
-    }
-  };
-
-  const modelLabel = (id?: string) => models.find((m) => m.id === id)?.label || id?.split('/').pop()?.replace(/:free$/, '') || '';
 
   const suggestedPrompts = ka
     ? [
@@ -119,13 +86,13 @@ export const StudentTeachingAgent: React.FC<StudentTeachingAgentProps> = ({ acti
       const res = await apiFetch('/api/agent/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, language, model: model || undefined, history }),
+        body: JSON.stringify({ message: text, language, history }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'request failed');
       setMessages((prev) => [
         ...prev,
-        { id: `ai-${Date.now()}`, role: 'assistant', content: data.reply, timestamp: now(), model: data.model, citations: data.citations },
+        { id: `ai-${Date.now()}`, role: 'assistant', content: data.reply, timestamp: now(), citations: data.citations },
       ]);
     } catch (err: any) {
       setMessages((prev) => [
@@ -134,8 +101,8 @@ export const StudentTeachingAgent: React.FC<StudentTeachingAgentProps> = ({ acti
           id: `err-${Date.now()}`,
           role: 'assistant',
           content: ka
-            ? 'ბოდიში, AI ახლა ვერ პასუხობს (უფასო მოდელები ზოგჯერ გადატვირთულია). სცადე ხელახლა ან აირჩიე სხვა მოდელი.'
-            : 'Sorry, the AI couldn’t answer right now (free models are sometimes busy). Try again or pick another model.',
+            ? 'ბოდიში, AI ახლა ვერ პასუხობს. სცადე ცოტა ხანში ხელახლა.'
+            : 'Sorry, the AI couldn’t answer right now. Please try again in a moment.',
           timestamp: now(),
         },
       ]);
@@ -172,7 +139,7 @@ export const StudentTeachingAgent: React.FC<StudentTeachingAgentProps> = ({ acti
             <div className="mt-4 flex items-center gap-2 text-[11px] font-medium">
               <span className={`w-2 h-2 rounded-full ${aiConfigured ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
               <span className={aiConfigured ? 'text-emerald-300' : 'text-amber-300'}>
-                {aiConfigured ? `OpenRouter • ${models.length || '—'} ${ka ? 'უფასო მოდელი' : 'free models'}` : ka ? 'AI არ არის კონფიგურირებული' : 'AI not configured'}
+                {aiConfigured ? (ka ? 'AI მენტორი ონლაინაა' : 'AI mentor online') : ka ? 'AI არ არის კონფიგურირებული' : 'AI not configured'}
               </span>
             </div>
           </TiltCard>
@@ -214,62 +181,6 @@ export const StudentTeachingAgent: React.FC<StudentTeachingAgentProps> = ({ acti
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Model picker */}
-              {models.length > 0 && (
-                <div className="relative">
-                  <button
-                    onClick={() => setModelMenuOpen((o) => !o)}
-                    className="flex items-center gap-2 pl-2.5 pr-2 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs text-slate-200 max-w-[190px]"
-                    aria-haspopup="listbox"
-                    aria-expanded={modelMenuOpen}
-                  >
-                    <Cpu className="w-3.5 h-3.5 text-brand-300 shrink-0" />
-                    <span className="truncate">{modelLabel(model)}</span>
-                    <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform ${modelMenuOpen ? 'rotate-180' : ''}`} />
-                  </button>
-                  <AnimatePresence>
-                    {modelMenuOpen && (
-                      <>
-                        <div className="fixed inset-0 z-20" onClick={() => setModelMenuOpen(false)} />
-                        <motion.ul
-                          role="listbox"
-                          initial={{ opacity: 0, y: -6, scale: 0.97 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: -6, scale: 0.97 }}
-                          transition={{ duration: 0.16 }}
-                          className="absolute right-0 mt-2 w-72 z-30 glass-strong rounded-2xl p-1.5 origin-top-right"
-                        >
-                          <li className="px-3 pt-2 pb-1.5 text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
-                            {ka ? 'უფასო მოდელები · OpenRouter' : 'Free models · OpenRouter'}
-                          </li>
-                          {models.map((m) => (
-                            <li key={m.id}>
-                              <button
-                                role="option"
-                                aria-selected={m.id === model}
-                                onClick={() => pickModel(m.id)}
-                                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs ${
-                                  m.id === model ? 'bg-brand-500/15 text-white' : 'text-slate-300 hover:bg-white/[0.05]'
-                                }`}
-                              >
-                                <span className="flex-1 min-w-0">
-                                  <span className="block font-semibold truncate">{m.label}</span>
-                                  <span className="block text-[10px] text-slate-500 truncate font-mono">{m.id}</span>
-                                </span>
-                                {m.free && <span className="text-[9px] font-bold uppercase text-emerald-300 bg-emerald-500/10 border border-emerald-500/25 px-1.5 py-0.5 rounded">free</span>}
-                                {m.id === model && <Check className="w-3.5 h-3.5 text-brand-300" />}
-                              </button>
-                            </li>
-                          ))}
-                          <li className="px-3 py-2 text-[10px] text-slate-500 leading-relaxed">
-                            {ka ? 'თუ არჩეული მოდელი დაკავებულია, პასუხს შემდეგი გასცემს.' : 'If the chosen model is busy, the next one answers.'}
-                          </li>
-                        </motion.ul>
-                      </>
-                    )}
-                  </AnimatePresence>
-                </div>
-              )}
               <button
                 onClick={() => setMessages([welcome()])}
                 title={t.agentClearChat}
@@ -328,12 +239,6 @@ export const StudentTeachingAgent: React.FC<StudentTeachingAgentProps> = ({ acti
                       </div>
                       <div className={`mt-1 px-1 text-[10px] text-slate-500 flex items-center gap-1.5 ${isAi ? '' : 'justify-end'}`}>
                         <span>{msg.timestamp}</span>
-                        {msg.model && (
-                          <>
-                            <span>·</span>
-                            <span className="font-mono">{modelLabel(msg.model)}</span>
-                          </>
-                        )}
                       </div>
                     </div>
                   </motion.div>
