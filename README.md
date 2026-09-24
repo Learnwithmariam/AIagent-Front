@@ -18,9 +18,9 @@ The frontend is deployed as a **Cloudflare Worker with static assets** (`wrangle
 **CLI**
 
 ```bash
-echo "VITE_API_URL=https://gk-btu-students-api.<subdomain>.workers.dev" > .env.production   # your API Worker URL
+echo "VITE_API_URL=https://aiagent-back.<subdomain>.workers.dev" > .env.production   # your API Worker URL
 npx wrangler login
-npm run deploy       # vite build + wrangler deploy → https://gk-btu-students.<subdomain>.workers.dev
+npm run deploy       # vite build + wrangler deploy → https://aiagent-front.<subdomain>.workers.dev
 ```
 
 **Workers Builds (dashboard, Git-connected)**: build command `npm run build`, deploy command `npx wrangler deploy`, and build variable `VITE_API_URL`.

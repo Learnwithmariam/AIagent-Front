@@ -1,6 +1,6 @@
 # G.K. BTU Students — frontend, deployed as a Cloudflare Worker serving static assets
 # Deploy: `npm run deploy` (vite build, then `wrangler deploy`)
-name = "gk-btu-students"
+name = "aiagent-front"
 compatibility_date = "2026-09-01"
 
 [assets]
