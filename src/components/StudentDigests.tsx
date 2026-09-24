@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../lib/api';
 import {
   Radio,
-  Mail,
   CheckCircle2,
   Calendar,
   ExternalLink,
@@ -52,21 +51,6 @@ export const StudentDigests: React.FC<StudentDigestsProps> = ({
     }
   };
 
-  const handleToggleSubscribe = async () => {
-    const nextVal = !activeStudent.digestSubscribed;
-    try {
-      const res = await apiFetch(`/api/students/${encodeURIComponent(activeStudent.email)}/subscription`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ digestSubscribed: nextVal }),
-      });
-      if (res.ok) {
-        onUpdateSubscription(nextVal);
-      }
-    } catch (err) {
-      console.error('Error updating subscription', err);
-    }
-  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -87,26 +71,10 @@ export const StudentDigests: React.FC<StudentDigestsProps> = ({
           </p>
         </div>
 
-        <button
-          onClick={handleToggleSubscribe}
-          className={`px-4 py-2.5 rounded-xl font-semibold text-xs flex items-center gap-2 transition-all shadow-lg ${
-            activeStudent.digestSubscribed
-              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30'
-              : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30'
-          }`}
-        >
-          {activeStudent.digestSubscribed ? (
-            <>
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              <span>{t.digestSubscribedText} ({activeStudent.email})</span>
-            </>
-          ) : (
-            <>
-              <Mail className="w-4 h-4" />
-              <span>{t.digestSubscribeBtn}</span>
-            </>
-          )}
-        </button>
+        <span className="px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 bg-white/[0.04] border border-white/[0.08] text-slate-300">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          {language === 'ka' ? 'ახალი დაიჯესტი ყოველ დილით 08:00-ზე, აქვე' : 'A new digest here every morning at 08:00'}
+        </span>
       </div>
 
       {/* Main Content Layout */}
@@ -156,8 +124,6 @@ export const StudentDigests: React.FC<StudentDigestsProps> = ({
                 <div className="flex items-center gap-2 text-xs text-indigo-400 font-semibold uppercase tracking-wider mb-2">
                   <Calendar className="w-4 h-4" />
                   <span>{t.date}: {selectedDigest.date}</span>
-                  <span className="text-slate-600">•</span>
-                  <span>{language === 'ka' ? `გაეგზავნა ${selectedDigest.sentToCount} სტუდენტს` : `Sent to ${selectedDigest.sentToCount} registered scholars`}</span>
                 </div>
                 <h2 className="text-xl sm:text-2xl font-bold text-slate-100 leading-tight">
                   {selectedDigest.headline}

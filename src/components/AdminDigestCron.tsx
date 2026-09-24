@@ -143,13 +143,17 @@ export const AdminDigestCron: React.FC<AdminDigestCronProps> = ({ language = 'ka
         <div className="lift bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
           <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">{t.cronBriefsCreated}</span>
           <div className="text-base font-bold text-slate-100 font-mono">{digests.length} {language === 'ka' ? 'დაიჯესტი' : 'Digests'}</div>
-          <div className="text-[11px] text-slate-500 mt-1">AI synthesis enabled</div>
+          <div className="text-[11px] text-slate-500 mt-1">{language === 'ka' ? 'RSS + უფასო AI · მხოლოდ აპში' : 'RSS + free AI · in-app only'}</div>
         </div>
 
         <div className="lift bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
           <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">{t.cronEmailsDispatched}</span>
-          <div className="text-base font-bold text-violet-400 font-mono">{emailLogs.length} {language === 'ka' ? 'ჩაბარებული' : 'Delivered'}</div>
-          <div className="text-[11px] text-slate-500 mt-1">100% delivery rate</div>
+          <div className="text-base font-bold text-violet-400 font-mono">
+            {emailLogs.filter((l) => l.status === 'sent').length} {language === 'ka' ? 'გაგზავნილი' : 'sent'}
+          </div>
+          <div className="text-[11px] text-slate-500 mt-1">
+            {language === 'ka' ? 'მხოლოდ ანგარიშის წერილები · დაიჯესტი არ იგზავნება' : 'Account emails only · the digest is never emailed'}
+          </div>
         </div>
       </div>
 
@@ -183,29 +187,20 @@ export const AdminDigestCron: React.FC<AdminDigestCronProps> = ({ language = 'ka
           <div className="flex items-center justify-between border-b border-slate-800 pb-4">
             <div>
               <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">
-                {language === 'ka' ? `გაგზავნის თარიღი: ${selectedDigest.date} • თემატიკა: ${selectedDigest.subjectFocus}` : `Sent on ${selectedDigest.date} • Subject Focus: ${selectedDigest.subjectFocus}`}
+                {language === 'ka' ? `თარიღი: ${selectedDigest.date} • თემატიკა: ${selectedDigest.subjectFocus}` : `${selectedDigest.date} • Subject focus: ${selectedDigest.subjectFocus}`}
               </span>
               <h2 className="text-xl font-bold text-white mt-1">{selectedDigest.headline}</h2>
             </div>
             <div className="text-right">
-              <span className="text-xs text-slate-400 block">{language === 'ka' ? 'ადრესატები' : 'Recipients'}</span>
-              <span className="font-bold text-sm text-emerald-400 font-mono">
-                {selectedDigest.sentToCount} {language === 'ka' ? 'რეგისტრირებული სტუდენტი' : 'Registered Students'}
+              <span className="text-xs text-slate-400 block">{language === 'ka' ? 'მიწოდება' : 'Delivery'}</span>
+              <span className="font-bold text-sm text-emerald-400">
+                {language === 'ka' ? 'მხოლოდ აპლიკაციაში' : 'In-app only'}
               </span>
             </div>
           </div>
 
           {/* Email Body Simulation */}
           <div className="bg-slate-950 rounded-xl border border-slate-800 p-6 space-y-5">
-            <div className="text-xs text-slate-400 border-b border-slate-800/80 pb-3 flex items-center justify-between">
-              <div>
-                <span className="text-slate-500">{language === 'ka' ? 'გამგზავნი:' : 'From:'}</span> G.K. BTU Students digest
-              </div>
-              <div>
-                <span className="text-slate-500">{language === 'ka' ? 'თემა:' : 'Subject:'}</span> [Morning Digest] {selectedDigest.headline}
-              </div>
-            </div>
-
             <p className="text-sm text-slate-200 leading-relaxed font-sans">{selectedDigest.summary}</p>
 
             {/* Articles */}

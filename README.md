@@ -1,6 +1,6 @@
 # G.K. BTU Students — Frontend
 
-React 19 + Vite + Tailwind v4 interface for the BTU course **Innovative Entrepreneurship & Startups**. Deployed on **Cloudflare Pages**; the API is a separate Cloudflare Worker (`AIagent-Back`).
+React 19 + Vite + Tailwind v4 interface for the BTU course **Innovative Entrepreneurship & Startups**. Deployed on **Cloudflare** (Worker + static assets); the API is a separate Cloudflare Worker (`AIagent-Back`).
 
 ## Local development
 
@@ -11,26 +11,23 @@ npm run dev          # http://localhost:5173
 
 The dev server proxies `/api` and `/ws` to the API Worker on `http://localhost:8787`. Start it with `npm run dev` in the backend repo, so no `.env` is needed locally.
 
-## Deploy to Cloudflare Pages
+## Deploy to Cloudflare
 
-**Option A: Git integration (dashboard)**
+The frontend is deployed as a **Cloudflare Worker with static assets** (`wrangler.toml` → `[assets] directory = "./dist"`, with `not_found_handling = "single-page-application"` for client-side routes). It needs **no secrets**: API keys live only in the backend Worker.
 
-1. Workers & Pages → Create → Pages → connect this repository
-2. Framework preset: *Vite* · Build command `npm run build` · Output `dist`
-3. Environment variable: `VITE_API_URL` = your Worker URL, e.g. `https://gk-btu-students-api.<account>.workers.dev` (no trailing `/`)
-4. Add the Pages URL to the backend's `FRONTEND_URL` in `wrangler.toml` (CORS), then redeploy the API
-
-**Option B: CLI**
+**CLI**
 
 ```bash
-echo "VITE_API_URL=https://gk-btu-students-api.<account>.workers.dev" > .env.production
+echo "VITE_API_URL=https://gk-btu-students-api.<subdomain>.workers.dev" > .env.production   # your API Worker URL
 npx wrangler login
-npm run deploy       # build + wrangler pages deploy dist
+npm run deploy       # vite build + wrangler deploy → https://gk-btu-students.<subdomain>.workers.dev
 ```
 
-**Option C: GitHub Actions.** `.github/workflows/deploy.yml` deploys on every push to `main`. It needs the repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, and the repository variable `VITE_API_URL`.
+**Workers Builds (dashboard, Git-connected)**: build command `npm run build`, deploy command `npx wrangler deploy`, and build variable `VITE_API_URL`.
 
-`VITE_API_URL` is baked in at build time, so rebuild after changing it. `public/_redirects` gives SPA routing and `public/_headers` sets security and caching headers.
+**GitHub Actions**: `.github/workflows/deploy.yml` deploys on every push to `main`. It needs the repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, and the repository variable `VITE_API_URL`.
+
+Then put the frontend URL into the backend's `FRONTEND_URL` / `PUBLIC_APP_URL` (CORS and email links) and redeploy the API. `VITE_API_URL` is baked in at build time, so rebuild after changing it.
 
 ## Design system
 

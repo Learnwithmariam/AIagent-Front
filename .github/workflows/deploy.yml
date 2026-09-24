@@ -1,4 +1,4 @@
-name: Deploy frontend to Cloudflare Pages
+name: Deploy frontend to Cloudflare
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: deploy-pages
+  group: deploy-frontend
   cancel-in-progress: true
 
 jobs:
@@ -33,4 +33,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name gk-btu-students --branch main
+          command: deploy

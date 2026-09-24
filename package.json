@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "deploy": "npm run build && wrangler pages deploy dist"
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "lucide-react": "^1.47.0",
@@ -27,5 +27,5 @@
     "vite": "^8.3.0",
     "wrangler": "^4.137.0"
   },
-  "description": "G.K. BTU Students — course platform frontend (React + Vite), deployed on Cloudflare Pages"
+  "description": "G.K. BTU Students — course platform frontend (React + Vite), deployed on Cloudflare Workers static assets"
 }
