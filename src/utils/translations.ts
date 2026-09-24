@@ -304,8 +304,8 @@ export const translations: TranslationDictionary = {
     ka: 'აკადემიური დილის დაიჯესტი და კვლევითი სიახლეები',
   },
   'digest.banner_desc': {
-    en: 'Every morning at 08:00 AM, our background Cron Agent fetches real industry breakthroughs, analyzes pedagogical relevance via AI (OpenRouter), and delivers an email digest.',
-    ka: 'ყოველ დილით 08:00 საათზე ჩვენი ავტონომიური აგენტი აგროვებს უახლეს ტექნოლოგიურ სიახლეებს, აკავშირებს მათ სილაბუსის თემებთან AI-ის (OpenRouter) დახმარებით და ამზადებს დაიჯესტს.',
+    en: 'Every morning at 08:00, the digest collects real startup news from free RSS feeds (TechCrunch, Crunchbase News, Sifted and more), and a free AI model summarizes it for the course.',
+    ka: 'ყოველ დილით 08:00 საათზე დაიჯესტი აგროვებს რეალურ სიახლეებს უფასო RSS არხებიდან (TechCrunch, Crunchbase News, Sifted და სხვ.), ხოლო უფასო AI მოდელი მათ კურსისთვის აჯამებს.',
   },
   'digest.subscribe': {
     en: 'Subscribe for Morning Digest',

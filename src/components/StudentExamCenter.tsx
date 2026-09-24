@@ -134,7 +134,12 @@ export const StudentExamCenter: React.FC<StudentExamCenterProps> = ({
                       className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs flex items-center justify-center gap-2 border border-slate-700 transition-all"
                     >
                       <FileCheck className="w-4 h-4 text-emerald-400" />
-                      <span>{t.examViewResult} ({alreadySubmitted.percentage}%)</span>
+                      <span>
+                        {t.examViewResult}{' '}
+                        {alreadySubmitted.status === 'pending_review'
+                          ? `(${language === 'ka' ? 'ელოდება შეფასებას' : 'awaiting grading'})`
+                          : `(${alreadySubmitted.percentage}%)`}
+                      </span>
                     </button>
                   ) : (
                     <>
@@ -188,9 +193,14 @@ export const StudentExamCenter: React.FC<StudentExamCenterProps> = ({
                       {new Date(sub.submittedAt).toLocaleDateString()}
                     </td>
                     <td className="py-3 px-4 font-mono font-bold">
-                      {sub.totalScore}/{sub.maxScore} ({sub.percentage}%)
+                      {sub.status === 'pending_review' ? <span className="text-slate-500">—/{sub.maxScore}</span> : <>{sub.totalScore}/{sub.maxScore} ({sub.percentage}%)</>}
                     </td>
                     <td className="py-3 px-4">
+                      {sub.status === 'pending_review' ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold bg-amber-500/10 text-amber-300 border border-amber-500/30">
+                          {language === 'ka' ? 'ელოდება შეფასებას' : 'Awaiting grading'}
+                        </span>
+                      ) : (
                       <span
                         className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold ${
                           sub.passed
@@ -201,6 +211,7 @@ export const StudentExamCenter: React.FC<StudentExamCenterProps> = ({
                         {sub.passed ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
                         {sub.passed ? t.passed : t.failed}
                       </span>
+                      )}
                     </td>
                     <td className="py-3 px-4">
                       <span

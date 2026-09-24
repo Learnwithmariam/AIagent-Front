@@ -470,7 +470,7 @@ export default function App() {
       />
 
       {/* Main Routed Area */}
-      <main className="flex-1 relative z-10">
+      <main className="flex-1 relative">
         <AnimatePresence mode="wait">
         <motion.div
           key={activeTab}

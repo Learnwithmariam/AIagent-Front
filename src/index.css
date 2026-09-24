@@ -85,7 +85,8 @@
   }
   body {
     font-family: var(--font-sans);
-    background: var(--color-slate-950);
+    /* html paints the base colour; body stays transparent so the aurora (z-index -1) shows through */
+    background: transparent;
     color: var(--color-slate-100);
     min-height: 100dvh;
   }
@@ -308,7 +309,8 @@ button.bg-indigo-600:not(:disabled):active {
 .aurora {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  /* behind all content without creating a stacking context on <main>, so modals can cover the navbar */
+  z-index: -1;
   pointer-events: none;
   overflow: hidden;
   background:

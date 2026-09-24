@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { apiFetch } from '../lib/api';
 import {
-  Sparkles,
   CheckCircle,
   XCircle,
   AlertTriangle,
@@ -32,7 +31,6 @@ export const AdminGradingModal: React.FC<AdminGradingModalProps> = ({
   const [gradings, setGradings] = useState<Record<string, QuestionGrading>>(
     submission.questionGradings || {}
   );
-  const [isAiGrading, setIsAiGrading] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const questions: Question[] = test?.questions || [];
@@ -58,36 +56,6 @@ export const AdminGradingModal: React.FC<AdminGradingModalProps> = ({
     }));
   };
 
-  const handleRunAiGrading = async (q: Question) => {
-    const studentAns = submission.answers[q.id];
-    if (studentAns === undefined) return;
-
-    setIsAiGrading(q.id);
-    try {
-      const res = await apiFetch('/api/ai/grade', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          question: q,
-          studentAnswer: studentAns,
-          language,
-        }),
-      });
-
-      if (res.ok) {
-        const aiResult: QuestionGrading = await res.json();
-        setGradings((prev) => ({
-          ...prev,
-          [q.id]: aiResult,
-        }));
-      }
-    } catch (err) {
-      alert(language === 'ka' ? 'კითხვის AI შეფასება ვერ მოხერხდა.' : 'Failed running AI grading on question.');
-    } finally {
-      setIsAiGrading(null);
-    }
-  };
-
   const handleSaveGrades = async () => {
     setIsSaving(true);
     let totalScore = 0;
@@ -111,7 +79,7 @@ export const AdminGradingModal: React.FC<AdminGradingModalProps> = ({
           totalScore,
           percentage,
           passed,
-          gradedBy: 'ai_and_admin',
+          gradedBy: 'lecturer',
         }),
       });
 
@@ -137,6 +105,11 @@ export const AdminGradingModal: React.FC<AdminGradingModalProps> = ({
               <h2 className="font-bold text-lg text-slate-100">
                 {t.gradingModalTitle}
               </h2>
+              {submission.status === 'pending_review' ? (
+                <span className="text-[11px] px-2.5 py-0.5 rounded-full font-bold uppercase bg-amber-500/10 text-amber-300 border border-amber-500/30">
+                  {language === 'ka' ? 'ელოდება შეფასებას' : 'Awaiting grading'}
+                </span>
+              ) : (
               <span
                 className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold uppercase ${
                   submission.passed
@@ -146,6 +119,7 @@ export const AdminGradingModal: React.FC<AdminGradingModalProps> = ({
               >
                 {submission.percentage}% ({submission.passed ? t.statusPassed : t.statusFailed})
               </span>
+              )}
             </div>
             <p className="text-xs text-slate-400 mt-1">
               {language === 'ka' ? 'სტუდენტი:' : 'Candidate:'} <strong className="text-slate-200">{submission.studentName}</strong> ({submission.studentEmail}) • {t.exam}: {submission.testTitle}
@@ -192,7 +166,7 @@ export const AdminGradingModal: React.FC<AdminGradingModalProps> = ({
               earnedPoints: 0,
               maxPoints: q.points,
               isCorrect: false,
-              feedback: language === 'ka' ? 'ჯერ არ არის შეფასებული' : 'Not graded yet',
+              feedback: '',
             };
 
             return (
@@ -226,17 +200,6 @@ export const AdminGradingModal: React.FC<AdminGradingModalProps> = ({
                     />
                     <span className="text-xs text-slate-400">/ {q.points} {t.pts}</span>
 
-                    {/* AI Re-grade button for subjective questions */}
-                    {(q.type === 'short_answer' || q.type === 'essay_code') && (
-                      <button
-                        onClick={() => handleRunAiGrading(q)}
-                        disabled={isAiGrading === q.id}
-                        className="px-2.5 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold flex items-center gap-1 transition-colors"
-                      >
-                        <Sparkles className="w-3 h-3 text-indigo-400" />
-                        <span>{isAiGrading === q.id ? (language === 'ka' ? 'აფასებს...' : 'Grading...') : t.regradeBtn}</span>
-                      </button>
-                    )}
                   </div>
                 </div>
 
@@ -273,6 +236,7 @@ export const AdminGradingModal: React.FC<AdminGradingModalProps> = ({
                   <textarea
                     value={grading.feedback || ''}
                     onChange={(e) => handleFeedbackChange(q.id, e.target.value)}
+                    placeholder={language === 'ka' ? 'კომენტარი სტუდენტისთვის (არასავალდებულო)' : 'Feedback for the student (optional)'}
                     rows={2}
                     className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   />
