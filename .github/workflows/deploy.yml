@@ -1,8 +1,12 @@
 name: Deploy frontend to Cloudflare
 
+# Runs on GitHub's servers — no local terminal needed.
+# Required repository secret: CLOUDFLARE_API_TOKEN
+# The API URL is derived from the account's workers.dev subdomain
+# (override with the repository variable VITE_API_URL, e.g. for a custom domain).
 on:
   push:
-    branches: [main]
+    branches: [main, claude/exciting-gauss-v4myn9]
   workflow_dispatch:
 
 concurrency:
@@ -13,7 +17,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      # job-level so the deploy step can be skipped until the secret exists
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
       - uses: actions/checkout@v4
@@ -23,14 +26,34 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
+
+      - name: Resolve API URL
+        if: ${{ env.CLOUDFLARE_API_TOKEN != '' }}
+        run: |
+          set -euo pipefail
+          api() { curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4$1"; }
+          ACCOUNT_ID="${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
+          if [ -z "$ACCOUNT_ID" ]; then ACCOUNT_ID=$(api /accounts | jq -r '.result[0].id'); fi
+          SUB=$(api "/accounts/$ACCOUNT_ID/workers/subdomain" | jq -r '.result.subdomain // empty')
+          if [ -z "$SUB" ]; then
+            echo "::error::This account has no workers.dev subdomain yet. Open Cloudflare dashboard → Workers & Pages once to create it, then re-run."
+            exit 1
+          fi
+          echo "CLOUDFLARE_ACCOUNT_ID=$ACCOUNT_ID" >> "$GITHUB_ENV"
+          echo "VITE_API_URL=${{ vars.VITE_API_URL }}" | sed "s|=\$|=https://gk-btu-students-api.$SUB.workers.dev|" >> "$GITHUB_ENV"
+          echo "APP_URL=https://gk-btu-students.$SUB.workers.dev" >> "$GITHUB_ENV"
+
       - run: npm run build
         env:
-          # Repository variable: the deployed API Worker URL, no trailing slash
-          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_API_URL: ${{ env.VITE_API_URL }}
+
       - name: Deploy
         if: ${{ env.CLOUDFLARE_API_TOKEN != '' }}
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy
+        run: npx wrangler deploy
+
+      - name: Summary
+        if: ${{ env.CLOUDFLARE_API_TOKEN != '' }}
+        run: |
+          echo "### Deployed" >> "$GITHUB_STEP_SUMMARY"
+          echo "- App: $APP_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Talks to API: $VITE_API_URL" >> "$GITHUB_STEP_SUMMARY"
